@@ -1,16 +1,16 @@
 import { configTable, configWighoutHeader } from "./headerTable";
 
-const Row = ({ rowData, configWithHeader }) => {
+const Row = ({ rowData, idxRow, configWithHeader }) => {
   const config = configWithHeader ? configTable : configWighoutHeader;
   // eslint-disable-next-line array-callback-return
   const baseRow = config.map((column, idx) => {
     if (configWithHeader) {
       switch (column.name) {
         case "Place": {
-          return <td key={`${rowData.rowNumber}${idx}`}>{rowData.id}</td>;
+          return <td key={`${rowData.rowNumber}${idx}`}>{idxRow}</td>;
         }
         case "Team": {
-          return <td key={`${rowData.rowNumber}${idx}`}>{rowData.name}</td>;
+          return <td key={`${rowData.rowNumber}${idx}`}>{rowData.nameTeam}</td>;
         }
         case "Played": {
           return <td key={`${rowData.rowNumber}${idx}`}>{rowData.played}</td>;

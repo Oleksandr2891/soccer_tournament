@@ -4,129 +4,98 @@ import matches from "../matches.json";
 const tableData = [
   {
     id: 1,
-    name: "Greece",
-    played: 2,
-    win: 2,
-    draw: 0,
-    lost: 0,
-    points: 6,
+    nameTeam: "Greece",
   },
   {
     id: 2,
-    name: "Argemtina",
-    played: 2,
-    win: 1,
-    draw: 0,
-    lost: 1,
-    points: 3,
+    nameTeam: "Argentina",
   },
   {
     id: 3,
-    name: "Germany",
-    played: 1,
-    win: 0,
-    draw: 1,
-    lost: 0,
-    points: 1,
+    nameTeam: "Germany",
   },
   {
     id: 4,
-    name: "Italy",
-    played: 3,
-    win: 0,
-    draw: 1,
-    lost: 2,
-    points: 1,
+    nameTeam: "Italy",
+  },
+  {
+    id: 5,
+    nameTeam: "Ukraine",
   },
 ];
 
 const TableBody = ({ tableCommonResults }) => {
-  // function createDataMathes(obj) {
-  //   let dataMatches = [];
-  //   obj.forEach((item, idx) => {
-  //     for (var key in item) {
-  //       let newItem = {};
-  //       dataMatches.push({
-  //         ...newItem,
-  //         ...{ match: idx, team: key, goal: item[key] },
-  //       });
-  //     }
-  //   });
-  //   return dataMatches;
-  // }
-
-  function createScorePlayed(team, arr) {
-    return arr.filter(
+  function createRowCommonScore(team, arr) {
+    const newArr = arr.filter(
       (item) =>
-        (item.firstTeamName === team && item.firstTeamScore) ||
-        (item.secondTeamName === team && item.secondTeamScore)
+        (item.firstTeamName === team && item.firstTeamScore !== null) ||
+        (item.secondTeamName === team && item.secondTeamScore !== null)
+    );
+
+    const nameTeam = team;
+    const played = newArr.length;
+    const win = newArr.filter(
+      (item) =>
+        (item.firstTeamScore > item.secondTeamScore &&
+          item.firstTeamName === team) ||
+        (item.secondTeamScore > item.firstTeamScore &&
+          item.secondTeamName === team)
     ).length;
+
+    const draw = newArr.filter(
+      (item) =>
+        (item.firstTeamScore === item.secondTeamScore &&
+          item.firstTeamName === team) ||
+        (item.secondTeamScore === item.firstTeamScore &&
+          item.secondTeamName === team)
+    ).length;
+
+    const lost = newArr.filter(
+      (item) =>
+        (item.firstTeamScore < item.secondTeamScore &&
+          item.firstTeamName === team) ||
+        (item.secondTeamScore < item.firstTeamScore &&
+          item.secondTeamName === team)
+    ).length;
+
+    const points = win * 3 + draw * 1;
+
+    return {
+      nameTeam,
+      played,
+      win,
+      draw,
+      lost,
+      points,
+    };
   }
 
-  function createScoreWin(team, arr) {
-    return arr
-      .filter(
-        (item) =>
-          (item.firstTeamName === team && item.firstTeamScore) ||
-          (item.secondTeamName === team && item.secondTeamScore)
-      )
-      .filter(
-        (item) =>
-          (item.firstTeamScore > item.secondTeamScore &&
-            item.firstTeamName === team) ||
-          (item.secondTeamScore > item.firstTeamScore &&
-            item.secondTeamName === team)
-      ).length;
+  function createDataCommonScore(arr) {
+    const dataCommonScore = [];
+    arr.forEach((item) => {
+      dataCommonScore.push(createRowCommonScore(item.nameTeam, matches));
+    });
+    return dataCommonScore;
   }
 
-  function createScoreDraw(team, arr) {
-    return arr
-      .filter(
-        (item) =>
-          (item.firstTeamName === team && item.firstTeamScore) ||
-          (item.secondTeamName === team && item.secondTeamScore)
-      )
-      .filter(
-        (item) =>
-          (item.firstTeamScore === item.secondTeamScore &&
-            item.firstTeamName === team) ||
-          (item.secondTeamScore === item.firstTeamScore &&
-            item.secondTeamName === team)
-      ).length;
+  function sortDataCommonScore(arr) {
+    return arr.sort((a, b) => b.points - a.points);
   }
 
-  // function createScoreDraw(team, arr) {
-  //   return arr
-  //     .filter(
-  //       (item) =>
-  //         (item.firstTeamName === team && item.firstTeamScore) ||
-  //         (item.secondTeamName === team && item.secondTeamScore)
-  //     )
-  //     .filter(
-  //       (item) =>
-  //         (item.firstTeamScore === item.secondTeamScore &&
-  //           item.firstTeamName === team) ||
-  //         (item.secondTeamScore === item.firstTeamScore &&
-  //           item.secondTeamName === team)
-  //     ).length;
-  // }
-
-  console.log(
-    "createScorePlayed(team, arr)",
-    createScorePlayed("Argentina", matches),
-    "createScoreWin(team, arr)",
-    createScoreWin("Argentina", matches),
-    "createScoreDraw(team, arr)",
-    createScoreDraw("Argentina", matches)
-  );
-
-  const data = tableCommonResults ? tableData : matches;
+  const data = tableCommonResults
+    ? sortDataCommonScore(createDataCommonScore(tableData))
+    : matches;
   const configWithHeader = tableCommonResults ? true : false;
   return (
     <tbody>
       {data.map((row, idx) => {
         return (
-          <Row key={idx} rowData={row} configWithHeader={configWithHeader} />
+          <Row
+            key={idx}
+            rowData={row}
+            idxRow={idx + 1}
+            configWithHeader={configWithHeader}
+          />
         );
       })}
     </tbody>
