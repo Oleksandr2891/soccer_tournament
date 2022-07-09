@@ -1,12 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Container from "./components/container";
+import ContainerMatches from "./components/containerMatches";
+import ContainerTable from "./components/containerTable";
+import Header from "./components/header";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-      </header>
-    </div>
+    <Container>
+      <Header />
+      <div className="flexBox">
+        <ContainerTable />
+        <ContainerMatches />
+      </div>
+    </Container>
   );
 }
 
