@@ -1,7 +1,7 @@
 import Row from "./row";
 import matches from "../matches.json";
 
-const tableData = [
+export const tableData = [
   {
     id: 1,
     nameTeam: "Greece",
