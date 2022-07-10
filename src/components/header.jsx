@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { tableData } from "./tableBody";
+import { useDispatch, useSelector } from "react-redux";
+import { addNewTeam } from "../redux/reducer/tableTeamName";
+import { getTeamName } from "../redux/sectors.js/selector";
+
+const initalId = 1;
 
 export function Header() {
+  const dispatch = useDispatch();
+  const { teamsNames } = useSelector(getTeamName);
   const [nameTeam, setNameTeam] = useState("");
-
   const handleChangeInput = (event) => {
     const { value } = event.currentTarget;
     setNameTeam(value);
@@ -11,29 +16,33 @@ export function Header() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const isContact = tableData.some(
+    const isContact = teamsNames.some(
       (item) => item.nameTeam.toLowerCase() === nameTeam.toLowerCase()
     );
+    function getIdForNewTeam() {
+      return Math.max(...teamsNames.map((item) => item.id)) + 1;
+    }
+
     if (!isContact) {
-      console.log("nameTeam", nameTeam);
-      // dispatch(addContact({ name, number }));
+      dispatch(
+        addNewTeam({
+          id: getIdForNewTeam() || initalId,
+          nameTeam,
+        })
+      );
       setNameTeam("");
-      // } else {
-      //   notifyError(`${name} is already in contacts`);
     }
   };
 
   return (
     <div className="header">
       <form action="submit" onSubmit={handleSubmit}>
-        {/* <input type="text" name="teams" id="teams" /> */}
         <input
           className="input"
           onChange={handleChangeInput}
           type="text"
           name="nameTeam"
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-          title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
           value={nameTeam}
           required
         />

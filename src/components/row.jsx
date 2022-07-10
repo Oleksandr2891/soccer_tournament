@@ -1,35 +1,96 @@
-// import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createNewMatchScore } from "../redux/reducer/dataMatches";
+import { getMatches } from "../redux/sectors.js/selector";
 import { configTable, configWighoutHeader } from "./headerTable";
 
-const Row = ({ rowData, idxRow, configWithHeader }) => {
-  // const [editedRow, setEditedRow] = useState({});
+const Row = ({ rowData, idxRow, configWithHeader, newTeams, oldTeams }) => {
+  const [newFirstTeamScore, setNewFirstTeamScore] = useState("");
+  const [newSecondTeamScore, setSecondTeamScore] = useState("");
+  const [newfirstTeamName, setFirstTeamName] = useState("");
+  const [newSecondTeamName, setSecondTeamName] = useState("");
+  const [optionsForSelect1, setOptionsForSelect1] = useState([]);
+  const [optionsForSelect2, setOptionsForSelect2] = useState([]);
+
+  const dispatch = useDispatch();
+  const { matches } = useSelector(getMatches);
+
   const config = configWithHeader ? configTable : configWighoutHeader;
 
-  function submitRow(value, idOfFIeld, nameOfField) {
-    const row = rowData;
-    console.log("value", value);
+  function submitRow(value, nameOfField) {
     if (value !== "") {
       if (nameOfField === "firstTeamScore") {
-        row.firstTeamScore = value;
-      } else {
-        row.secondTeamScore = value;
-      }
-
-      if (row.firstTeamScore !== null && row.secondTeamScore !== null) {
-        console.log("row", row);
+        setNewFirstTeamScore(value);
+      } else if (nameOfField === "secondTeamScore") {
+        setSecondTeamScore(value);
+      } else if (nameOfField === "firstTeamName") {
+        setFirstTeamName(value);
+        updateOption();
+      } else if (nameOfField === "secondTeamName") {
+        setSecondTeamName(value);
+        updateOption();
       }
     }
   }
 
+  useEffect(() => {
+    if (newfirstTeamName !== "" && newSecondTeamName !== "") {
+      dispatch(
+        createNewMatchScore({
+          ...rowData,
+          firstTeamName: newfirstTeamName,
+          secondTeamName: newSecondTeamName,
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newfirstTeamName, newSecondTeamName]);
+
+  useEffect(() => {
+    if (
+      newFirstTeamScore !== "" &&
+      newSecondTeamScore !== "" &&
+      rowData.firstTeamName &&
+      rowData.secondTeamName
+    ) {
+      dispatch(
+        createNewMatchScore({
+          ...rowData,
+          firstTeamScore: newFirstTeamScore,
+          secondTeamScore: newSecondTeamScore,
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newFirstTeamScore, newSecondTeamScore, rowData]);
+
+  useEffect(() => {
+    updateOption();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newTeams, oldTeams, newfirstTeamName, newSecondTeamName, rowData]);
+
+  function updateOption() {
+    const options1 = [""];
+    const options2 = [""];
+    options1.push(newTeams);
+    oldTeams?.forEach((team) => {
+      if (team !== newfirstTeamName && team !== newSecondTeamName) {
+        options2.push(team);
+      } else if (team !== newfirstTeamName) {
+        options2.push(team);
+      }
+    });
+    setOptionsForSelect1(options1);
+    setOptionsForSelect2(options2);
+  }
+
   function onBlur(e) {
-    // console.log("потеря фокуса", e.target.value, e.target.id);
-    submitRow(e.target.value, e.target.id, e.target.name);
+    submitRow(e.target.value, e.target.name);
   }
 
   function handleKeyPress(e) {
     if (e.key === "Enter") {
-      // console.log("нажат ентер", e.target, e.target.id);
-      submitRow(e.target.value, e.target.id, e.target.name);
+      submitRow(e.target.value, e.target.name);
       e.target.blur();
     }
   }
@@ -66,7 +127,27 @@ const Row = ({ rowData, idxRow, configWithHeader }) => {
     } else {
       switch (column) {
         case "firstTeamName": {
-          return <td key={idx}>{rowData.firstTeamName}</td>;
+          return (
+            <td key={idx}>
+              {rowData.firstTeamName !== null ? (
+                rowData.firstTeamName
+              ) : (
+                <select
+                  name="firstTeamName"
+                  className="inputForTeam"
+                  onBlur={onBlur}
+                >
+                  {optionsForSelect1?.map((element, idx) => {
+                    return (
+                      <option key={idx} value={element}>
+                        {element}
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
+            </td>
+          );
         }
         case "firstTeamScore": {
           return (
@@ -108,7 +189,27 @@ const Row = ({ rowData, idxRow, configWithHeader }) => {
           );
         }
         case "secondTeamScore": {
-          return <td key={idx}>{rowData.secondTeamName}</td>;
+          return (
+            <td key={idx}>
+              {rowData.secondTeamName !== null ? (
+                rowData.secondTeamName
+              ) : (
+                <select
+                  name="secondTeamName"
+                  className="inputForTeam"
+                  onBlur={onBlur}
+                >
+                  {optionsForSelect2?.map((element, idx) => {
+                    return (
+                      <option key={idx} value={element}>
+                        {element}
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
+            </td>
+          );
         }
         default:
           // eslint-disable-next-line no-unused-expressions
